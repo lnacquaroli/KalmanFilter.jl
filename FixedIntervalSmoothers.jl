@@ -54,8 +54,8 @@ function kalman_smooth(
 	)
 	A = _return_type(Pk, muladd(-K, H, eye(length(xk))))
 	Aᵀ, Fᵀ = A', F'
-	F = qr(S)
-	SH = F.R \ (F.Q' * H')
+	Sqr = qr(S)
+	SH = Sqr.R \ (Sqr.Q' * H')
 	λ̂ = mul!(similar(λ), Fᵀ, λ)
 	Λ̂ = Fᵀ*Λ*F
 	x̂ = muladd(Pk, -λ̂, xk)
