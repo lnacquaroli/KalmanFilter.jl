@@ -70,9 +70,10 @@ function linear_kalman(
 	# Error covariance propagation (Predicted process covariance matrix, a priori)
 	P_ = _process_covariance_priori(P, F, Q)
 	# Innovation (or pre-fit residual) covariance
-	S = _innovation_covariance(P_, H, R)
+	PHt = P_ * H'
+	S = _innovation_covariance(P_, PHt, H, R)
 	# Kalman gain
-	K = _kalman_gain(P_, H, S)
+	K = _kalman_gain(P_, PHt, S)
 
 	## Update process
 	# New observation (innovation process)
@@ -107,12 +108,13 @@ function _process_covariance_posteriori(
 	return _return_type(P, (eye(m) .- K*H) *P)
 end
 
-function _kalman_gain(P::AbstractMatrix, H::AbstractMatrix, S::AbstractMatrix)
-	return _return_type(P, S \ (P * H'))
+function _kalman_gain(P::AbstractMatrix, PHt::AbstractMatrix, S::AbstractMatrix)
+	F = qr(S)
+	return _return_type(P, F.R \ (F.Q' * PHt))
 end
 
 function _innovation_covariance(
-	P::AbstractMatrix, H::AbstractMatrix, R::AbstractMatrix,
+	P::AbstractMatrix, PHt::AbstractMatrix, H::AbstractMatrix, R::AbstractMatrix,
 	)
-	return _return_type(P, H*P*H' .+ R)
+	return _return_type(P, H*PHt .+ R)
 end
