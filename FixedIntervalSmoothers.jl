@@ -23,7 +23,8 @@ function kalman_smooth(
 	)
 	A = similar(F)
 	mul!(A, Pk, F')
-	A = _return_type(Pk, Pkp1 \ A)
+	F = qr(Pkp1)
+	A = _return_type(Pk, F.R\(F.q' * A))
 	P = Pkp1 .- Pk
     P = Pk .+ _return_type(Pk, A*P*A')
 	x̂ = x₀ .- xkp1
@@ -53,7 +54,8 @@ function kalman_smooth(
 	)
 	A = _return_type(Pk, muladd(-K, H, eye(length(xk))))
 	Aᵀ, Fᵀ = A', F'
-	SH = S \ H'
+	F = qr(S)
+	SH = F.R \ (F.Q' * H')
 	λ̂ = mul!(similar(λ), Fᵀ, λ)
 	Λ̂ = Fᵀ*Λ*F
 	x̂ = muladd(Pk, -λ̂, xk)
