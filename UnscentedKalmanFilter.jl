@@ -154,5 +154,6 @@ function _covariance_matrix_ukf(
 end
 
 function _kalman_gain(P::AbstractMatrix, Pxy::AbstractMatrix, Pyy::AbstractMatrix)
-	return _return_type(P, Pyy \ Pxy)
+	F = qr(Pyy)
+	return _return_type(P, F.R \ (F.Q' * Pxy))
 end
